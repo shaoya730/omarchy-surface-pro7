@@ -7,11 +7,9 @@ if [[ $product_name != "Surface Pro 7" ]]; then
   exit 1
 fi
 
-pinctrl_module="$(lsmod | awk '$1 ~ /^pinctrl_/ { print $1; exit }')"
-if [[ -z $pinctrl_module ]]; then
-  echo 'Could not detect the Surface pinctrl module.' >&2
-  exit 1
-fi
+# Surface Pro 7 uses the Intel Ice Lake pinctrl driver. Do not use lsmod here:
+# this helper is normally run before the newly installed kernel is booted.
+pinctrl_module=pinctrl_icelake
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 sudo install -d /etc/mkinitcpio.conf.d
