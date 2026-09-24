@@ -4,7 +4,7 @@ This repository builds an Omarchy Linux 7.2.5 kernel with the Surface Pro 7 supp
 
 - Intel IPTS touchscreen support, including the Ice Lake MEI and IOMMU quirks
 - Surface Type Cover and Surface HID fixes
-- Surface Pro 7 IPU3 camera support
+- Surface Pro 7 camera sensor and IPU IOMMU fixes (IPU4P driver is separate)
 - TPS68470 camera LED support
 - `iptsd`, the userspace touch and stylus daemon
 - Surface Pro 7 thermal and initramfs setup
@@ -48,6 +48,7 @@ journalctl -b -k | grep -Ei 'ipts|surface|ipu'
 - `kernel/` — standalone `linux-omarchy` PKGBUILD, Omarchy patches, Surface Pro 7 patch, and x86_64 config
 - `iptsd/` — Arch PKGBUILD for the official linux-surface `iptsd` v3.1.0 release
 - `surface/` — Surface Pro 7 thermald configuration
+- `camera/` — experimental IPU4P module build for `7.2.5-5-omarchy`; see [camera/README.md](camera/README.md)
 - `install-surface-pro7.sh` — initramfs and thermal configuration helper
 
 The actual kernel compilation has to be performed on Arch Linux; this repository was prepared and patch-validated from Windows.
