@@ -21,7 +21,7 @@ To install the already built modules and a locally extracted firmware file (no r
 sudo ./omarchy-surface-pro7/camera/install.sh ./sp7-ipu4-camera /path/to/ipu4p_cpd.bin
 ```
 
-The installer records the five IPU4P modules and the OV5693 replacement in a hash-checked manifest. It uses the kernel's native `ipu_bridge`, leaves other kernel versions untouched, and does not rebuild the initramfs. To remove only the unchanged installed modules and restore the original OV5693 on the next boot:
+The installer records the five IPU4P modules and the OV5693 replacement in a hash-checked manifest. It uses the kernel's native `ipu_bridge`, does not enable upstream's experimental OV7251 options, leaves other kernel versions untouched, and does not rebuild the initramfs. To remove only the unchanged installed modules and restore the original OV5693 on the next boot:
 
 ```bash
 sudo ./omarchy-surface-pro7/camera/rollback.sh ./sp7-ipu4-camera

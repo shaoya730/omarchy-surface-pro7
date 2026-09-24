@@ -11,6 +11,7 @@ expected_commit=aa0043f3649c3bff9247d5f99de5d164c3cdcc75
 }
 
 KREL=7.2.5-5-omarchy \
+  MODPROBE_CONFIG=/lib/modules/7.2.5-5-omarchy/updates/extra/.ipu4p-ov7251-unused.conf \
   MODULE_SOURCE_MANIFEST_EXTRA="$script_dir/ipu4p-omarchy.modules" \
   "$source_dir/scripts/uninstall-modules.sh"
 echo 'Reboot to unload any camera modules still resident in memory. Firmware was retained.'

@@ -21,6 +21,8 @@ expected_firmware_hash=ff2c36cc81a5c726508b22970c2e2538ff06107dc5a72c93401403c22
 [[ -f $source_dir/ov5693-omarchy/ov5693.ko ]] || { echo 'Build the modules first.' >&2; exit 1; }
 
 FIRMWARE="$firmware" KREL=7.2.5-5-omarchy \
+  MODPROBE_CONFIG=/lib/modules/7.2.5-5-omarchy/updates/extra/.ipu4p-ov7251-unused.conf \
+  MODPROBE_SOURCE="$script_dir/unused-ov7251.conf" \
   MODULE_SOURCE_MANIFEST_EXTRA="$script_dir/ipu4p-omarchy.modules" \
   "$source_dir/scripts/install-modules.sh"
 
