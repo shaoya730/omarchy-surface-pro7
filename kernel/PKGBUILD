@@ -524,7 +524,7 @@ sha256sums=('55ddf0df8325d9dad96fcff7bd93977d22e3f50af06527572af59b77c7632b78'
             'SKIP'
             '1cbe1ddd3b37cd0c7e4bad4af08e681eda2f7a61698004322bb87f320aa95dbb'
             'SKIP'
-            'c4948d6838264492eea94e7dea5130c81c2618c979a485a1e2598a2b076aefd6')
+            '3c636d65e2acfa5f5084b1f6b29344d19e4cd7c0ce4e2a84f21b2ae02be87528')
 
 export KBUILD_BUILD_HOST=omarchy
 export KBUILD_BUILD_USER=$pkgbase
