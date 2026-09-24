@@ -2,7 +2,7 @@
 set -euo pipefail
 
 [[ $EUID == 0 ]] || { echo 'Run this script with sudo.' >&2; exit 1; }
-[[ $(uname -r) == 7.2.5-5-omarchy ]] || { echo 'Wrong running kernel.' >&2; exit 1; }
+[[ $(uname -r) == 7.2.5-6-omarchy ]] || { echo 'Wrong running kernel.' >&2; exit 1; }
 
 source_dir=$(realpath -- "${1:?Usage: sudo ./camera/install.sh /path/to/sp7-ipu4-camera /path/to/ipu4p_cpd.bin}")
 firmware=$(realpath -- "${2:?Firmware path required}")
@@ -20,12 +20,12 @@ expected_firmware_hash=ff2c36cc81a5c726508b22970c2e2538ff06107dc5a72c93401403c22
 }
 [[ -f $source_dir/ov5693-omarchy/ov5693.ko ]] || { echo 'Build the modules first.' >&2; exit 1; }
 
-FIRMWARE="$firmware" KREL=7.2.5-5-omarchy \
-  MODPROBE_CONFIG=/lib/modules/7.2.5-5-omarchy/updates/extra/.ipu4p-ov7251-unused.conf \
+FIRMWARE="$firmware" KREL=7.2.5-6-omarchy \
+  MODPROBE_CONFIG=/lib/modules/7.2.5-6-omarchy/updates/extra/.ipu4p-ov7251-unused.conf \
   MODPROBE_SOURCE="$script_dir/unused-ov7251.conf" \
   MODULE_SOURCE_MANIFEST_EXTRA="$script_dir/ipu4p-omarchy.modules" \
   "$source_dir/scripts/install-modules.sh"
 
-modinfo -k 7.2.5-5-omarchy -n intel-ipu4p
-modinfo -k 7.2.5-5-omarchy -n ov5693
+modinfo -k 7.2.5-6-omarchy -n intel-ipu4p
+modinfo -k 7.2.5-6-omarchy -n ov5693
 echo 'Installed on disk. No modules were loaded and no initramfs or boot entry was changed.'

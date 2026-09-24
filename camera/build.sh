@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $(uname -r) != 7.2.5-5-omarchy ]]; then
-  echo 'This build targets the installed 7.2.5-5-omarchy kernel.' >&2
+if [[ $(uname -r) != 7.2.5-6-omarchy ]]; then
+  echo 'This build targets the installed 7.2.5-6-omarchy kernel.' >&2
   exit 1
 fi
 
@@ -14,14 +14,14 @@ if [[ $(git -C "$source_dir" rev-parse HEAD) != "$expected_commit" ]]; then
   exit 1
 fi
 
-kernel_dir=/lib/modules/7.2.5-5-omarchy/build
+kernel_dir=/lib/modules/7.2.5-6-omarchy/build
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 sensor_dir=$source_dir/ov5693-omarchy
 mkdir -p -- "$sensor_dir"
 install -m644 "$script_dir/Makefile" "$sensor_dir/Makefile"
 install -m644 "$source_dir/linux-6.19.8/drivers/media/i2c/ov5693.c" "$sensor_dir/ov5693.c"
 
-KDIR=$kernel_dir KREL=7.2.5-5-omarchy "$source_dir/scripts/build-modules.sh" -j1
+KDIR=$kernel_dir KREL=7.2.5-6-omarchy "$source_dir/scripts/build-modules.sh" -j1
 make -C "$kernel_dir" M="$sensor_dir" -j1 modules
-test "$(modinfo -F vermagic "$sensor_dir/ov5693.ko" | cut -d' ' -f1)" = 7.2.5-5-omarchy
-echo "IPU4P and OV5693 modules built for 7.2.5-5-omarchy in $source_dir"
+test "$(modinfo -F vermagic "$sensor_dir/ov5693.ko" | cut -d' ' -f1)" = 7.2.5-6-omarchy
+echo "IPU4P and OV5693 modules built for 7.2.5-6-omarchy in $source_dir"

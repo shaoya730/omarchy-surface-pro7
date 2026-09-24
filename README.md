@@ -21,8 +21,8 @@ cd omarchy-surface-pro7
 
 cd kernel
 makepkg -s
-sudo pacman -U ./linux-omarchy-7.2.5-5-x86_64.pkg.tar.zst \
-  ./linux-omarchy-headers-7.2.5-5-x86_64.pkg.tar.zst
+sudo pacman -U ./linux-omarchy-7.2.5-6-x86_64.pkg.tar.zst \
+  ./linux-omarchy-headers-7.2.5-6-x86_64.pkg.tar.zst
 
 cd ../iptsd
 makepkg -si
@@ -48,7 +48,7 @@ journalctl -b -k | grep -Ei 'ipts|surface|ipu'
 - `kernel/` — standalone `linux-omarchy` PKGBUILD, Omarchy patches, Surface Pro 7 patch, and x86_64 config
 - `iptsd/` — Arch PKGBUILD for the official linux-surface `iptsd` v3.1.0 release
 - `surface/` — Surface Pro 7 thermald configuration
-- `camera/` — experimental IPU4P module build for `7.2.5-5-omarchy`; see [camera/README.md](camera/README.md)
+- `camera/` — experimental IPU4P module build for `7.2.5-6-omarchy`; see [camera/README.md](camera/README.md)
 - `install-surface-pro7.sh` — initramfs and thermal configuration helper
 
 The actual kernel compilation has to be performed on Arch Linux; this repository was prepared and patch-validated from Windows.

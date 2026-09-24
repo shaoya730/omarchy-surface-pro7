@@ -3582,7 +3582,7 @@ index 4e7ba60f3..c8f1a641d 100644
 +	)
 +
 +#define IS_INTEL_IPU(pdev) ((pdev)->vendor == PCI_VENDOR_ID_INTEL &&	\
-+			   ((pdev)->device == 0x9a19 ||		\
++			   ((pdev)->device == 0x8a19 || (pdev)->device == 0x9a19 || \
 +			    (pdev)->device == 0x9a39 ||		\
 +			    (pdev)->device == 0x4e19 ||		\
 +			    (pdev)->device == 0x465d ||		\
