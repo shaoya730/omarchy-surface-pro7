@@ -11,7 +11,7 @@ git -C sp7-ipu4-camera checkout aa0043f3649c3bff9247d5f99de5d164c3cdcc75
 ./omarchy-surface-pro7/camera/build.sh ./sp7-ipu4-camera
 ```
 
-The six IPU4P modules are built inside the upstream checkout. The modified sensor is built at `sp7-ipu4-camera/ov5693-omarchy/ov5693.ko`. An earlier build against `7.2.5-5-omarchy` succeeded, but live firmware authentication failed with repeated DMA faults from IPU PCI device `8086:8a19`. The `7.2.5-6-omarchy` kernel patch adds that exact ID to the existing per-device IOMMU identity mapping quirk. This is a targeted attempt, not yet a verified camera fix. The kernel's native `ipu_bridge` is used.
+The five IPU4P modules are built inside the upstream checkout. The modified sensor is built at `sp7-ipu4-camera/ov5693-omarchy/ov5693.ko`. An earlier build against `7.2.5-5-omarchy` succeeded, but live firmware authentication failed with repeated DMA faults from IPU PCI device `8086:8a19`. The `7.2.5-6-omarchy` kernel patch adds that exact ID to the existing per-device IOMMU identity mapping quirk. On the test Surface Pro 7, firmware authentication succeeded and direct capture produced three changing raw frames from each RGB camera without a DMA fault. The kernel's native `ipu_bridge` is used. The identity mapping reduces DMA isolation for this one IPU device; it does not change the global IOMMU setting.
 
 Building alone does not make the camera usable. Runtime work requires `ipu4p_cpd.bin` extracted from Microsoft's Surface Pro 7 driver package, module installation, and capture tests for both cameras. The firmware verified for this build came from Microsoft's `SurfacePro7_Win11_22621_25.090.3489.0.msi` (valid Microsoft digital signature); its SHA-256 is `ff2c36cc81a5c726508b22970c2e2538ff06107dc5a72c93401403c227e5157f`. Do not commit or redistribute the Microsoft firmware. The modified OV5693 module shadows the existing kernel module; keep another bootable kernel available before testing. Rebuild the camera modules whenever the Omarchy kernel version changes.
 
@@ -21,9 +21,27 @@ To install the already built modules and a locally extracted firmware file (no r
 sudo ./omarchy-surface-pro7/camera/install.sh ./sp7-ipu4-camera /path/to/ipu4p_cpd.bin
 ```
 
-The installer records the five IPU4P modules and the OV5693 replacement in a hash-checked manifest. It uses the kernel's native `ipu_bridge`, does not enable upstream's experimental OV7251 options, leaves other kernel versions untouched, and does not rebuild the initramfs. To remove only the unchanged installed modules and restore the original OV5693 on the next boot:
+The installer records the five IPU4P modules and the OV5693 replacement in a hash-checked manifest. It uses the kernel's native `ipu_bridge`, does not enable upstream's experimental OV7251 options, leaves other kernel versions untouched, and does not rebuild the initramfs.
+
+To load the installed modules and run bounded direct-capture checks, close applications using the cameras and run:
 
 ```bash
+sudo modprobe -r ov5693 &&
+sudo modprobe ov5693 &&
+sudo timeout 30s modprobe intel-ipu4p-isys &&
+sudo timeout 30s modprobe intel-ipu4p-psys
+
+cd ./sp7-ipu4-camera
+sudo ./test-capture.sh front
+sudo ./test-capture.sh rear
+```
+
+Each capture command records three unpacked BG10 raw frames into `sp7-ipu4-camera/captures/`. On the test device, `front.raw` was 30,233,088 bytes (2592x1944) and `rear.raw` was 47,941,632 bytes (3264x2448); all six frame hashes differed. This verifies the direct raw capture path, **not** processed video, image quality, or camera availability in desktop applications. PipeWire's initial enumeration of the raw video nodes triggered repeated `v4l_enum_fmt` kernel warnings on this build; no new warnings occurred during the direct captures. Do not leave the experimental modules installed if this behavior is unacceptable.
+
+To roll back:
+
+```bash
+cd ~
 sudo ./omarchy-surface-pro7/camera/rollback.sh ./sp7-ipu4-camera
 sudo reboot
 ```
