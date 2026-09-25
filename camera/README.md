@@ -44,6 +44,8 @@ The same Omarchy test system subsequently installed Arch `libcamera`/`libcamera-
 
 Chromium subsequently enumerated both cameras after enabling its PipeWire camera feature, but its front-camera preview remained blank/spinning. PipeWire showed a connected, running 640x480 RGBA stream from the front libcamera node to Chromium, so enumeration and portal access alone were not sufficient. A separate 15-frame PipeWire test completed, while a 120-frame test exited unsuccessfully under a 20-second cap. During the longer tests, the kernel repeatedly logged CSI-2 receiver error `0x4000` and `Ouch. Stream start failed.` on the OV5693 route; the messages stopped after capture ended. Do not use this build for browser meetings yet or leave a failing preview open: repeated capture attempts can flood the journal. The modules remain installed for investigation, but stable sustained capture and browser video are **not validated**.
 
+On the same Surface, a later bounded front-camera test delivered 30 processed 640x480 frames at about 28.6 fps with WirePlumber stopped. After an application used the cameras, Chromium's front preview went blank again; with the application closed, `systemctl --user restart wireplumber` restored a live front image in a roughly five-second WebRTC sample test. This is a session recovery, **not** a driver fix or validation of a sustained browser meeting. A separate rear-camera attempt logged fatal CSI-2 errors (`0x88`/`0x80`), 31 failed sensor starts, and `Ouch. Stream start failed.` Avoid repeatedly opening a failing rear preview. Restarting WirePlumber can briefly interrupt audio and may require reselecting the previous audio profile.
+
 To roll back:
 
 ```bash
