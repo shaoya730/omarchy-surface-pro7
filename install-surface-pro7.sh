@@ -17,7 +17,11 @@ fi
 EOF
 sudo install -Dm644 "$script_dir/surface/thermal-conf.xml" /etc/thermald/thermal-conf.xml
 
-sudo mkinitcpio -P
+if command -v limine-mkinitcpio >/dev/null 2>&1; then
+  sudo limine-mkinitcpio
+else
+  sudo mkinitcpio -P
+fi
 if command -v systemctl >/dev/null 2>&1; then
   sudo systemctl enable --now thermald.service
 fi
