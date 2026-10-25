@@ -1,0 +1,45 @@
+Subject: [PATCH] ALSA: hda: intel-sdw-acpi: validate link count before GENMASK
+
+The legacy mipi-sdw-master-count fallback constructs a link mask before
+validating the firmware-provided count. A zero count underflows count - 1
+and causes an undefined shift in GENMASK, as do sufficiently large counts.
+
+Defer constructing the fallback mask until the existing count checks have
+rejected zero and out-of-range values. A valid manager-list already has a
+nonzero mask, so preserve it without changing link selection or quirks.
+
+This is a local fix for the UBSAN report on Surface Pro 7.
+---
+ sound/hda/core/intel-sdw-acpi.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/sound/hda/core/intel-sdw-acpi.c b/sound/hda/core/intel-sdw-acpi.c
+--- a/sound/hda/core/intel-sdw-acpi.c
++++ b/sound/hda/core/intel-sdw-acpi.c
+@@ -57,7 +57,7 @@ sdw_intel_scan_controller(struct sdw_intel_acpi_info *info)
+ {
+ 	struct acpi_device *adev = acpi_fetch_acpi_dev(info->handle);
+ 	struct fwnode_handle *fwnode;
+-	unsigned long list;
++	unsigned long list = 0;
+ 	unsigned int i;
+ 	u32 count;
+ 	u32 tmp;
+@@ -90,7 +90,6 @@ sdw_intel_scan_controller(struct sdw_intel_acpi_info *info)
+ 				ret);
+ 			return ret;
+ 		}
+-		list = GENMASK(count - 1, 0);
+ 	} else {
+ 		list = tmp;
+ 		count = hweight32(list);
+@@ -109,6 +108,9 @@ sdw_intel_scan_controller(struct sdw_intel_acpi_info *info)
+ 	}
+ 	dev_dbg(&adev->dev, "ACPI reports %d SDW Link devices\n", count);
+ 
++	if (!list)
++		list = GENMASK(count - 1, 0);
++
+ 	info->count = count;
+ 	info->link_mask = 0;
+ 

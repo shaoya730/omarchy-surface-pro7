@@ -1,0 +1,29 @@
+Time: 2026-10-25 15:58:25 Asia/Shanghai
+Executable: /opt/wechat/wechat
+Package: wechat-bin 4.1.13.26-1
+PID: 6005
+Faulting TID: 6549 (CaptureThread)
+Signal: SIGABRT (6)
+
+Fatal error in: .../third_party/webrtc/modules/video_capture/linux/video_capture_v4l2.cc, line 416
+last system error: 1
+Check failed: !race_checker416.RaceDetected()
+
+Abbreviated faulting-thread stack, module-relative offsets:
+#0  libc.so.6 + 0x9a11c
+#1  raise (libc.so.6 + 0x3e5d0)
+#2  abort (libc.so.6 + 0x25685)
+#3  wechat + 0x88a6d61
+#4  wechat + 0x88a766b
+#5  wechat + 0x88b303c
+#6  wechat + 0x88b3128
+#7  wechat + 0x88b3b7a
+#8  wechat + 0x88b3763
+#9  libc.so.6 + 0x98042
+#10 libc.so.6 + 0x12072c
+
+Official binary SHA-256:
+2749535f299ba67feb8ef80cab898bb0531fa8f376b16f8a72db706811c84132
+
+Package integrity check: 197 total files, 0 altered files.
+No complete core dump or camera frames are attached.

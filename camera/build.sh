@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $(uname -r) != 7.2.5-6-omarchy ]]; then
-  echo 'This build targets the installed 7.2.5-6-omarchy kernel.' >&2
+kernel_release=${KREL:-$(uname -r)}
+if [[ ! $kernel_release =~ ^7\.2\.8-[0-9]+-omarchy-bore-surface$ && $kernel_release != 7.2.5-6-omarchy ]]; then
+  echo 'This build targets the Surface-adapted Omarchy kernel.' >&2
   exit 1
 fi
 
@@ -14,14 +15,26 @@ if [[ $(git -C "$source_dir" rev-parse HEAD) != "$expected_commit" ]]; then
   exit 1
 fi
 
-kernel_dir=/lib/modules/7.2.5-6-omarchy/build
+kernel_dir=/lib/modules/$kernel_release/build
+[[ $(make -s -C "$kernel_dir" kernelrelease) == "$kernel_release" ]] || {
+  echo 'Kernel headers do not match the target release.' >&2; exit 1;
+}
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+for camera_patch in ipu4p-video-numbering.patch ipu4p-rgb-notifier.patch; do
+  patch_file=$script_dir/$camera_patch
+  if patch --dry-run --batch --forward -d "$source_dir" -p1 < "$patch_file" >/dev/null 2>&1; then
+    patch --batch --forward -d "$source_dir" -p1 < "$patch_file"
+  elif ! patch --dry-run --batch --reverse -d "$source_dir" -p1 < "$patch_file" >/dev/null 2>&1; then
+    echo "IPU4P patch does not match this source tree: $camera_patch" >&2
+    exit 1
+  fi
+done
 sensor_dir=$source_dir/ov5693-omarchy
+KDIR=$kernel_dir KREL=$kernel_release "$source_dir/scripts/build-modules.sh" -j1
 mkdir -p -- "$sensor_dir"
 install -m644 "$script_dir/Makefile" "$sensor_dir/Makefile"
 install -m644 "$source_dir/linux-6.19.8/drivers/media/i2c/ov5693.c" "$sensor_dir/ov5693.c"
 
-KDIR=$kernel_dir KREL=7.2.5-6-omarchy "$source_dir/scripts/build-modules.sh" -j1
 make -C "$kernel_dir" M="$sensor_dir" -j1 modules
-test "$(modinfo -F vermagic "$sensor_dir/ov5693.ko" | cut -d' ' -f1)" = 7.2.5-6-omarchy
-echo "IPU4P and OV5693 modules built for 7.2.5-6-omarchy in $source_dir"
+test "$(modinfo -F vermagic "$sensor_dir/ov5693.ko" | cut -d' ' -f1)" = "$kernel_release"
+echo "IPU4P and OV5693 modules built for $kernel_release in $source_dir"

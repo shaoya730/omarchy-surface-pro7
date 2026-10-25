@@ -8,13 +8,7 @@ if [[ $product_name != "Surface Pro 7" ]]; then
 fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-sudo install -d /etc/mkinitcpio.conf.d
-# Limit Surface-only modules to kernels that provide the Surface drivers.
-sudo tee /etc/mkinitcpio.conf.d/surface_device_modules.conf >/dev/null <<'EOF'
-if [[ $KERNELVERSION == *-omarchy || $KERNELVERSION == *-surface ]]; then
-  MODULES=(pinctrl_icelake surface_aggregator surface_aggregator_registry surface_aggregator_hub surface_hid_core surface_hid surface_kbd hid_surface ipts intel_lpss_pci 8250_dw)
-fi
-EOF
+sudo install -Dm644 "$script_dir/surface/mkinitcpio.conf" /etc/mkinitcpio.conf.d/surface_device_modules.conf
 sudo install -Dm644 "$script_dir/surface/thermal-conf.xml" /etc/thermald/thermal-conf.xml
 
 if command -v limine-mkinitcpio >/dev/null 2>&1; then

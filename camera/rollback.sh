@@ -10,8 +10,10 @@ expected_commit=aa0043f3649c3bff9247d5f99de5d164c3cdcc75
   exit 1
 }
 
-KREL=7.2.5-6-omarchy \
-  MODPROBE_CONFIG=/lib/modules/7.2.5-6-omarchy/updates/extra/.ipu4p-ov7251-unused.conf \
+kernel_release=${KREL:-$(uname -r)}
+[[ $kernel_release =~ ^7\.2\.8-[0-9]+-omarchy-bore-surface$ || $kernel_release == 7.2.5-6-omarchy ]] || { echo 'Wrong target kernel.' >&2; exit 1; }
+KREL=$kernel_release \
+  MODPROBE_CONFIG=/lib/modules/$kernel_release/updates/extra/.ipu4p-ov7251-unused.conf \
   MODULE_SOURCE_MANIFEST_EXTRA="$script_dir/ipu4p-omarchy.modules" \
   "$source_dir/scripts/uninstall-modules.sh"
 echo 'Reboot to unload any camera modules still resident in memory. Firmware was retained.'

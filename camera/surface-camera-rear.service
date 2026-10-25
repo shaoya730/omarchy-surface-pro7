@@ -1,0 +1,14 @@
+[Unit]
+Description=Surface Pro 7 rear camera on-demand bridge
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/omarchy-surface-pro7/camera/surface-camera-ondemand-v5 /dev/video1 rear
+Environment=LIBCAMERA_IPA_CONFIG_PATH=%h/.local/share/omarchy-surface-pro7/camera/ipa
+KillMode=control-group
+TimeoutStopSec=5s
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

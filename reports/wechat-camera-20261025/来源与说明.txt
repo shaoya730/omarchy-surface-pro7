@@ -1,0 +1,16 @@
+Primary upstream fix:
+https://webrtc.googlesource.com/src/+/c420a240e19e02026f7dfec1261acc4153f1a1ff
+
+Upstream code review:
+https://webrtc-review.googlesource.com/c/src/+/465581
+
+Vendor homepage:
+https://linux.weixin.qq.com/
+
+Official x86_64 package checked for version metadata only:
+https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb
+Checked on 2026-10-25: Package wechat, Version 4.1.13.26, Architecture amd64.
+
+本证据包只包含人工筛选的技术报告和崩溃摘录。
+不包含完整日志、程序二进制、摄像头图片或内存转储。
+未向腾讯或其他第三方自动提交。

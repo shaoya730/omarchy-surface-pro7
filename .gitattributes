@@ -1,0 +1,10 @@
+PKGBUILD text eol=lf
+config.x86_64 text eol=lf
+# Preserve diff context markers and signed upstream patch bytes.
+*.patch text eol=lf -whitespace
+*.sh text eol=lf
+*.conf text eol=lf
+*.asc text eol=lf
+*.sig -text
+# Keep the imported tuning files byte-identical, including their final blank line.
+camera/ipa/simple/*.yaml whitespace=-blank-at-eof

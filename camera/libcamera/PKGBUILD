@@ -1,0 +1,76 @@
+# Local packaging of a verified libcamera 0.7.2 Surface autofocus build.
+# Dependency/split layout follows Arch libcamera 0.7.2-4 (ae31dca61cfa).
+pkgbase=libcamera
+pkgname=(libcamera libcamera-ipa libcamera-tools gst-plugin-libcamera)
+pkgver=0.7.2
+pkgrel=4.1
+pkgdesc='Camera support library with Surface Pro 7 SoftISP autofocus'
+arch=(x86_64)
+url='https://libcamera.org/'
+options=(!strip !debug)
+source=()
+sha256sums=()
+
+_build=${LIBCAMERA_AF_BUILD:?Set LIBCAMERA_AF_BUILD to the verified build directory}
+_source=${LIBCAMERA_AF_SOURCE:?Set LIBCAMERA_AF_SOURCE to its source directory}
+
+_pick() {
+  local group=$1 file destination
+  shift
+  for file; do
+    destination="$srcdir/$group/${file#$pkgdir/}"
+    mkdir -p "$(dirname "$destination")"
+    mv "$file" "$destination"
+  done
+}
+
+package_libcamera() {
+  license=(Apache-2.0 CC0-1.0 'GPL-2.0-only WITH Linux-syscall-note'
+           GPL-2.0-or-later LGPL-2.1-or-later
+           'GPL-2.0-or-later WITH Linux-syscall-note OR BSD-3-Clause'
+           'GPL-2.0-or-later WITH Linux-syscall-note OR MIT')
+  depends=(glibc gnutls libcamera-ipa libelf libgcc libglvnd libstdc++
+           libunwind libyaml libyuv sh systemd-libs libudev.so)
+  optdepends=('gst-plugin-libcamera: GStreamer plugin' 'libcamera-tools: applications')
+  provides=(libcamera.so libcamera-base.so)
+  [[ $(git -C "$_source" rev-parse HEAD) == 191e202178f02430b5942397c70d215cdd2056fa ]]
+  meson install -C "$_build" --no-rebuild --destdir "$pkgdir"
+  # Arch also ships a signature for the V4L2 compatibility library.
+  "$_source/src/ipa/ipa-sign.sh" "$_build/src/ipa-priv-key.pem" \
+    "$pkgdir/usr/lib/libcamera/v4l2-compat.so" \
+    "$pkgdir/usr/lib/libcamera/v4l2-compat.so.sign"
+  install -Dm644 "$_source/LICENSES/BSD-3-Clause.txt" "$pkgdir/usr/share/licenses/$pkgname/BSD-3-Clause.txt"
+  install -m644 "$_source/LICENSES/"{Linux-syscall-note,MIT}.txt "$pkgdir/usr/share/licenses/$pkgname/"
+  _pick libcamera-ipa "$pkgdir/usr/lib/libcamera"
+  _pick libcamera-tools "$pkgdir/usr/bin/"{cam,libcamera-bug-report,lc-compliance,qcam}
+  _pick gst-plugin-libcamera "$pkgdir/usr/lib/gstreamer-1.0"
+}
+
+package_libcamera-ipa() {
+  pkgdesc+=' - matched signed IPA modules'
+  license=(BSD-2-Clause CC-BY-SA-4.0 CC0-1.0 GPL-2.0-or-later LGPL-2.1-or-later)
+  depends=(glibc libcamera libcamera.so libcamera-base.so libgcc libstdc++)
+  # Keep modules byte-identical to their matching build-generated signatures.
+  mv "$srcdir/$pkgname/usr" "$pkgdir/"
+  install -Dm644 "$_source/LICENSES/BSD-2-Clause.txt" "$pkgdir/usr/share/licenses/$pkgname/BSD-2-Clause.txt"
+}
+
+package_libcamera-tools() {
+  pkgdesc+=' - matched camera tools'
+  license=(BSD-2-Clause CC0-1.0 GPL-2.0-or-later LGPL-2.1-or-later)
+  depends=(glibc gtest libcamera libcamera.so libcamera-base.so libdrm libevent
+           libevent-2.1.so libevent_pthreads-2.1.so libgcc libjpeg-turbo libjpeg.so
+           libstdc++ libtiff libtiff.so libyaml qt6-base sdl2)
+  conflicts=('libcamera-tests<0.0.1-2')
+  replaces=('libcamera-tests<0.0.1-2')
+  mv "$srcdir/$pkgname/usr" "$pkgdir/"
+  install -Dm644 "$_source/LICENSES/BSD-2-Clause.txt" "$pkgdir/usr/share/licenses/$pkgname/BSD-2-Clause.txt"
+}
+
+package_gst-plugin-libcamera() {
+  pkgdesc='GStreamer libcamera plugin with Surface SoftISP autofocus'
+  license=(CC0-1.0 LGPL-2.1-or-later)
+  depends=(glib2 libglib-2.0.so libgobject-2.0.so glibc gst-plugins-base-libs
+           gstreamer libcamera libcamera.so libcamera-base.so libgcc libstdc++)
+  mv "$srcdir/$pkgname/usr" "$pkgdir/"
+}

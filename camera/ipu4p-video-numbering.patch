@@ -1,0 +1,36 @@
+--- a/linux-6.19.8/drivers/media/pci/intel/ipu-isys-video.c
++++ b/linux-6.19.8/drivers/media/pci/intel/ipu-isys-video.c
+@@ -30,6 +30,12 @@
+ #include "ipu-trace.h"
+ #include "ipu-fw-isys.h"
+ #include "ipu-fw-com.h"
++
++/* Keep raw media-controller nodes outside legacy webcam scanners when requested. */
++static int video_nr_base = -1;
++module_param(video_nr_base, int, 0444);
++MODULE_PARM_DESC(video_nr_base,
++                 "First raw video node number (-1: automatic, 0..255: minimum)");
+ 
+ static unsigned int num_stream_support = IPU_ISYS_NUM_STREAMS;
+ module_param(num_stream_support, uint, 0660);
+@@ -2621,9 +2627,19 @@
+ 
+ 	mutex_lock(&av->mutex);
+ 
+-	rval = video_register_device(&av->vdev, VFL_TYPE_VIDEO, -1);
++	rval = video_register_device_no_warn(&av->vdev, VFL_TYPE_VIDEO,
++					     video_nr_base);
+ 	if (rval)
+ 		goto out_media_entity_cleanup;
++
++	/* V4L2 wraps to zero when the requested range is full. Refuse that
++	 * fallback so a raw node never takes a reserved application number.
++	 */
++	if (video_nr_base < -1 || video_nr_base > 255 ||
++	    (video_nr_base >= 0 && av->vdev.num < video_nr_base)) {
++		rval = -ENFILE;
++		goto out_media_entity_cleanup;
++	}
+ 
+ 	if (av->debug_link_only && !debug_capture_links) {
+ 		/* Debug tap: leave unlinked, see ipu_isys_video::debug_link_only */

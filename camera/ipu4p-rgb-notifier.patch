@@ -1,0 +1,37 @@
+--- a/linux-6.19.8/drivers/media/pci/intel/ipu-isys.c
++++ b/linux-6.19.8/drivers/media/pci/intel/ipu-isys.c
+@@ -594,6 +594,7 @@
+ 	struct ipu_isys *isys =
+ 		container_of(notifier, struct ipu_isys, notifier);
+ 
++	dev_info(&isys->adev->dev, "async sensor registration complete\n");
+ 	return v4l2_device_register_subdev_nodes(&isys->v4l2_dev);
+ }
+ 
+@@ -601,6 +602,12 @@
+ 	.bound = isys_notifier_bound,
+ 	.complete = isys_notifier_complete,
+ };
++
++/* Optional firmware ports excluded from this camera installation. */
++static unsigned int disabled_csi2_ports;
++module_param(disabled_csi2_ports, uint, 0444);
++MODULE_PARM_DESC(disabled_csi2_ports,
++                 "Firmware CSI-2 port bitmap excluded from async sensor discovery");
+ 
+ static int isys_notifier_init(struct ipu_isys *isys)
+ {
+@@ -629,6 +636,13 @@
+ 			    isys->pdata->ipdata->csi2.nports) < 0) {
+ 			dev_info(dev,
+ 				 "skipping endpoint at fw port %u (no receiver)\n",
++				 vep.base.port);
++			continue;
++		}
++
++		if (vep.base.port < 32 &&
++		    (disabled_csi2_ports & BIT(vep.base.port))) {
++			dev_info(dev, "skipping disabled sensor at fw port %u\n",
+ 				 vep.base.port);
+ 			continue;
+ 		}
